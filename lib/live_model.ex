@@ -25,11 +25,14 @@ defmodule LiveModel do
 
     alias MyAppWeb.MyLive.Model
 
-    # un-import `assign/2,3` and friends that are included in `use MyAppWeb, :live_view` to avoid accidental use.
-    # (You should use the model helper functions instead, explained later in this moduledoc)
+    # un-import `assign/2,3` and friends that are included in
+    # `use MyAppWeb, :live_view` to avoid accidental use.
+    # (You should use the model helper functions instead, explained
+    # later in this moduledoc)
     import Phoenix.Component, except: [assign: 2, assign: 3, assign_new: 3, update: 3]
-    # alternatively, if you don't use other functions in `Phoenix.Component` and you get an "unused import"
-    # warning from the above, you can do something like this instead:
+    # alternatively, if you don't use other functions in
+    # `Phoenix.Component` and you get an "unused import" warning
+    # from the above, you can do something like this instead:
     # import Phoenix.Component, only: []
 
     @impl true
@@ -37,6 +40,18 @@ defmodule LiveModel do
       user = MyApp.get_user!(user_id)
 
       {:ok, Model.assign_new(socket, user)} # assigns a new model struct under the `@model` assign
+    end
+
+    @impl true
+    def handle_event("new_sale", _params, sockt) do
+      # update assigns with `Model.put/2,3` and `Model.update/3`
+      {:noreply, Model.put(socket, :sale_text, "Apples are now 10% off!")}
+    end
+
+    @impl true
+    def handle_event("some_event", _params, sockt) do
+      # Dialyzer will warn you when trying to put/update invalid keys
+      {:noreply, Model.put(socket, :bad_key, :uhoh)}
     end
   ```
 
@@ -63,6 +78,21 @@ defmodule LiveModel do
   The "model" naming scheme is inspired by the [Elm architecture/programming language](https://elm-lang.org/).
   """
 
+  @doc """
+  Define a LiveView model.
+
+  This macro should be given a do block, whose contents are `field`s:
+
+  ```elixir
+  defmodel do
+    field :my_string_assign, String.t(), default: ""
+    field :my_number_assign, integer(), required: true
+  end
+  ```
+
+  See the `LiveModel` documentation for more info and examples.
+  """
+  @spec defmodel(do_block :: list()) :: Macro.t()
   defmacro defmodel(do: ast) do
     fields_ast =
       case ast do
