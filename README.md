@@ -12,4 +12,5 @@ def deps do
 end
 ```
 
-See the `LiveModel` module documentation for usage instructions
+See the `LiveModel` module documentation on [HexDocs](https://hexdocs.pm/live_model/0.1.0/LiveModel.html) for usage 
+instructions
