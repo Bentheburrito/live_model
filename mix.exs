@@ -4,7 +4,7 @@ defmodule LiveModel.MixProject do
   def project do
     [
       app: :live_model,
-      version: "0.1.0",
+      version: "0.2.0",
       elixir: "~> 1.15",
       start_permanent: Mix.env() == :prod,
       description: description(),
@@ -28,7 +28,7 @@ defmodule LiveModel.MixProject do
   # Run "mix help deps" to learn about dependencies.
   defp deps do
     [
-      {:phoenix_live_view, "~> 0.19.0"},
+      {:phoenix_live_view, "~> 1.1"},
       {:ex_doc, "~> 0.27", only: :dev, runtime: false}
     ]
   end

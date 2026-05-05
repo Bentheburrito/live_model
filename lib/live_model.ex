@@ -1,7 +1,8 @@
 defmodule LiveModel do
   @moduledoc """
-  Create and manage a LiveView model. A model allows you to define your LiveView assigns declaratively, similar to how
-  you would use a `Phoenix.Component` and its `attr/2,3` macro.
+  Create and manage a LiveView model. A model allows you to define your
+  LiveView assigns declaratively, similar to how you would use a
+  `Phoenix.Component` and its `attr/2,3` macro.
 
   To create a model, import this module and use the `defmodel` macro, like so:
 
@@ -39,7 +40,8 @@ defmodule LiveModel do
     def mount(_params, %{"user_id" => user_id}, socket) do
       user = MyApp.get_user!(user_id)
 
-      {:ok, Model.assign_new(socket, user)} # assigns a new model struct under the `@model` assign
+      # assigns a new model struct under the `@model` assign
+      {:ok, Model.assign_new(socket, user)}
     end
 
     @impl true
@@ -55,27 +57,35 @@ defmodule LiveModel do
     end
   ```
 
-  You would then access assigns in your render function/template via `@model.assign`, instead of `@assign`.
+  You would then access assigns in your render function/template via
+  `@model.assign`, instead of `@assign`.
 
-  The `defmodel` macro will create a struct and `t()` type for you. It will also create the following helper functions:
-  - `new/x`: creates a struct, where arity `x` is the number of required fields plus `1`. Required fields are passed
-     as individual arguments to `new/x`, and optional fields are passed in a Keyword list (or another Enumerable like
-     a map)
-  - `assign_new/x`: similar to `new/x`, but takes the socket as the first argument and assigns the new struct under
-    `@model`.
-  - `put/2-3`: given a LiveView socket, updates the `:model` assign with the given field(s) and value(s). This function
-     is meant to replace use of `Phoenix.Component.assign` in your LiveView
-  - `update/2-3`: given a LiveView socket, updates the `:model` assign by passing the current value under `field` to the
-    given `updater` function. The result then replaces the original value. This function
-     is meant to replace use of `Phoenix.Component.update` in your LiveView
+  The `defmodel` macro will create a struct and `t()` type for you. It will
+  also create the following helper functions:
+
+  - `new/x`: creates a struct, where arity `x` is the number of required fields
+     plus `1`. Required fields are passed as individual arguments to `new/x`,
+     and optional fields are passed in a Keyword list (or another Enumerable
+     like a map)
+  - `assign_new/x`: similar to `new/x`, but takes the socket as the first
+     argument and assigns the new struct under `@model`.
+  - `put/2-3`: given a LiveView socket, updates the `:model` assign with the
+     given field(s) and value(s). This function is meant to replace use of
+    `Phoenix.Component.assign` in your LiveView
+  - `update/2-3`: given a LiveView socket, updates the `:model` assign by
+     passing the current value under `field` to the given `updater` function.
+     The result then replaces the original value. This function is meant to
+     replace use of `Phoenix.Component.update` in your LiveView
 
   Please read each function's documentation for more information.
 
-  Much of the implementation of `defmodel` is heavily inspired by Lucas San Román's `typedstruct` macro. You can read
-  more about it (and Elixir's AST/macros in general) in their
+  Much of the implementation of `defmodel` is heavily inspired by Lucas San
+  Román's `typedstruct` macro. You can read more about it (and Elixir's
+  AST/macros in general) in their
   [blogpost](https://dorgan.netlify.app/posts/2021/04/the_elixir_ast_typedstruct/).
 
-  The "model" naming scheme is inspired by the [Elm architecture/programming language](https://elm-lang.org/).
+  The "model" naming scheme is inspired by the [Elm architecture/programming
+  language](https://elm-lang.org/).
   """
 
   @doc """
@@ -139,25 +149,30 @@ defmodule LiveModel do
       defstruct unquote(fields)
 
       @doc """
-      Create a new model struct.
+      Create a new model struct. If the first argument is a
+      `t:Phoenix.LiveView.Socket`, the model is assigned to the socket under
+      `@model`. Otherwise, the model struct is returned.
       """
-      def new(unquote_splicing(enforced_field_vars), optional_fields \\ []) do
-        struct(
-          %__MODULE__{unquote_splicing(Enum.zip(enforced_fields, enforced_field_vars))},
-          optional_fields
-        )
-      end
-
-      @doc """
-      Create a new model struct and assigns it to `:model` on the given LiveView socket.
-      """
-      def assign_new(socket, unquote_splicing(enforced_field_vars), optional_fields \\ []) do
+      def new(%Phoenix.LiveView.Socket{} = socket, unquote_splicing(enforced_field_vars), optional_fields) do
         assign(
           socket,
           :model,
           new(unquote_splicing(enforced_field_vars), optional_fields)
         )
       end
+
+      def new(%Phoenix.LiveView.Socket{} = socket, unquote_splicing(enforced_field_vars)) do
+        new(socket, unquote_splicing(enforced_field_vars), [])
+      end
+
+      def new(unquote_splicing(enforced_field_vars), optional_fields) do
+        struct(
+          %__MODULE__{unquote_splicing(Enum.zip(enforced_fields, enforced_field_vars))},
+          optional_fields
+        )
+      end
+
+      def new(unquote_splicing(enforced_field_vars)), do: new(unquote_splicing(enforced_field_vars), [])
 
       @doc """
       Updates the model in the assigns of the given `socket`.
